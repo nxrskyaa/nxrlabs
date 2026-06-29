@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NXR — Onchain Builder // Agentic Coding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --black: #000000;
+    --surface: #111111;
+    --surface-raised: #1A1A1A;
+    --border: #222222;
+    --border-visible: #333333;
+    --text-disabled: #666666;
+    --text-secondary: #999999;
+    --text-primary: #E8E8E8;
+    --text-display: #FFFFFF;
+    --accent: #D71921;
+    --success: #4A9E5C;
+    --interactive: #5B9BF6;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text-primary);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .mono { font-family: "Space Mono", monospace; }
+  .display { font-family: "Doto", "Space Mono", monospace; }
+
+  .label {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: var(--text-display); }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+  /* DOT GRID BG */
+  .dot-grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
+    background-size: 12px 12px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* BOOT SEQUENCE */
+  .boot {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--black);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 24px;
+    transition: opacity 0.4s ease-out;
+  }
+  .boot.done { opacity: 0; pointer-events: none; }
+  .boot-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-display);
+    animation: boot-pulse 1s ease-in-out infinite;
+  }
+  .boot-text {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+  @keyframes boot-pulse {
+    0%,100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* NAV */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1080px; margin: 0 auto; padding: 0 32px;
+  }
+  .nav-brand {
+    font-family: "Doto", monospace;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    transition: color 0.2s ease-out;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--text-display); }
+  .nav-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 96px 0 64px;
+    z-index: 1;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: end;
+  }
+  .hero-left {}
+  .hero-status {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 24px;
+  }
+  .hero-status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success);
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+  @keyframes status-pulse {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .hero-status-text {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .hero-name {
+    font-family: "Doto", monospace;
+    font-size: 88px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--text-display);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .hero-tagline {
+    font-size: 20px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.4;
+    max-width: 420px;
+  }
+  .hero-tagline strong { color: var(--text-primary); font-weight: 400; }
+
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-end;
+  }
+  .hero-meta {
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+  .hero-meta span { color: var(--text-disabled); }
+
+  .hero-location {
+    display: flex; align-items: center; gap: 8px;
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .hero-location::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* STAT BAR */
+  .stats {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    z-index: 1; position: relative;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 32px;
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-value {
+    font-family: "Space Mono", monospace;
+    font-size: 32px;
+    color: var(--text-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .stat-value .unit {
+    font-size: 11px;
+    color: var(--text-disabled);
+    letter-spacing: 0.08em;
+    margin-left: 4px;
+  }
+  .stat-label {
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+  }
+  .stat-bar {
+    margin-top: 8px;
+    display: flex;
+    gap: 2px;
+  }
+  .stat-bar-seg {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+  }
+  .stat-bar-seg.filled { background: var(--text-display); }
+  .stat-bar-seg.accent { background: var(--accent); }
+
+  /* SECTION */
+  .section {
+    padding: 80px 0;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-display);
+    letter-spacing: -0.01em;
+  }
+  .section-title .num {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    color: var(--text-disabled);
+    letter-spacing: 0.1em;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+  .section-count {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+  }
+
+  /* ABOUT CODE BLOCK */
+  .about-code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    overflow-x: auto;
+  }
+  .about-code .key { color: var(--text-disabled); }
+  .about-code .val { color: var(--text-primary); }
+  .about-code .str { color: #5B9BF6; }
+  .about-code .punct { color: var(--text-disabled); }
+
+  .about-tags {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 32px;
+  }
+  .tag {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-visible);
+    border-radius: 999px;
+    padding: 6px 14px;
+    transition: all 0.2s ease-out;
+  }
+  .tag:hover {
+    border-color: var(--text-display);
+    color: var(--text-display);
+  }
+
+  /* PROJECT CARDS */
+  .projects-featured {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: border-color 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card:hover { border-color: var(--border-visible); }
+  .project-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease-out;
+  }
+  .project-card:hover::before { height: 100%; }
+
+  .project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .project-name {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-display);
+  }
+  .project-stars {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    color: var(--text-disabled);
+    letter-spacing: 0.04em;
+  }
+  .project-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .project-stack {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .project-stack span {
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+  }
+  .project-stack span:not(:last-child)::after {
+    content: " ·";
+    margin-left: 2px;
+  }
+  .project-links {
+    display: flex; gap: 12px;
+    margin-top: 4px;
+  }
+  .project-link {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border: 1px solid var(--border-visible);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease-out;
+  }
+  .project-link:hover {
+    color: var(--text-display);
+    border-color: var(--text-display);
+  }
+  .project-link.primary {
+    background: var(--text-display);
+    color: var(--black);
+    border-color: var(--text-display);
+  }
+  .project-link.primary:hover {
+    background: transparent;
+    color: var(--text-display);
+  }
+
+  /* REPO LIST */
+  .repo-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .repo-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto auto 120px;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease-out;
+  }
+  .repo-row:hover { background: rgba(255,255,255,0.02); }
+  .repo-row:hover .repo-name { color: var(--text-display); }
+
+  .repo-index {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    color: var(--text-disabled);
+  }
+  .repo-name {
+    font-size: 15px;
+    color: var(--text-primary);
+    transition: color 0.2s ease-out;
+  }
+  .repo-name .fork-tag {
+    font-family: "Space Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-disabled);
+    border: 1px solid var(--border-visible);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .repo-desc {
+    font-size: 13px;
+    color: var(--text-disabled);
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .repo-lang {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .repo-updated {
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    text-align: right;
+  }
+
+  /* X FEED */
+  .feed-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .feed-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .feed-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feed-handle {
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .feed-date {
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    margin-left: auto;
+  }
+  .feed-body {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+  .feed-body strong { color: var(--text-display); }
+  .feed-footer {
+    display: flex; gap: 24px;
+    margin-top: 4px;
+  }
+  .feed-stat {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    color: var(--text-disabled);
+  }
+
+  /* ACHIEVEMENTS */
+  .achievements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .achievement {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+  }
+  .achievement-icon {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: 50%;
+    position: relative;
+  }
+  .achievement-icon.star::after {
+    content: "★";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  .achievement-icon.shark::after {
+    content: "⟁";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .achievement-icon.pair::after {
+    content: "◆";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  .achievement-icon.yolo::after {
+    content: "⚡";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .achievement-name {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  /* CONTACT */
+  .contact {
+    padding: 96px 0;
+    position: relative; z-index: 1;
+  }
+  .contact-inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .contact-title {
+    font-family: "Doto", monospace;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text-display);
+    font-weight: 500;
+  }
+  .contact-sub {
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+  .contact-links {
+    display: flex;
+    gap: 16px;
+  }
+  .contact-link {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border: 1px solid var(--border-visible);
+    border-radius: 999px;
+    color: var(--text-primary);
+    transition: all 0.2s ease-out;
+    min-height: 48px;
+    display: flex; align-items: center;
+  }
+  .contact-link:hover {
+    border-color: var(--text-display);
+    color: var(--text-display);
+  }
+  .contact-link.primary {
+    background: var(--text-display);
+    color: var(--black);
+    border-color: var(--text-display);
+  }
+  .contact-link.primary:hover {
+    background: transparent;
+    color: var(--text-display);
+  }
+
+  /* FOOTER */
+  .footer {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .footer-text {
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .container { padding: 0 20px; }
+    .nav-inner { padding: 0 20px; }
+    .nav-links { gap: 16px; }
+    .nav-links a { font-size: 10px; }
+    .hero { padding: 64px 0 48px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+    .hero-name { font-size: 56px; }
+    .hero-right { align-items: flex-start; }
+    .hero-meta { text-align: left; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .stats-grid .stat-item:last-child { grid-column: 1 / -1; }
+    .projects-featured { grid-template-columns: 1fr; }
+    .feed-grid { grid-template-columns: 1fr; }
+    .repo-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .repo-desc, .repo-lang, .repo-updated { text-align: left; }
+    .contact-title { font-size: 36px; }
+    .contact-links { flex-direction: column; width: 100%; }
+    .contact-link { justify-content: center; }
+    .footer-inner { flex-direction: column; gap: 12px; }
+    .section { padding: 56px 0; }
+    .section-header { flex-direction: column; gap: 8px; }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div class="boot" id="boot">
+  <div class="boot-dot"></div>
+  <div class="boot-text">INITIALIZING // NXR_PORTFOLIO</div>
+</div>
+
+<div class="dot-grid-bg"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">NXR</a>
+    <div class="nav-links">
+      <a href="#about" class="active"><span class="nav-dot"></span>ABOUT</a>
+      <a href="#projects">PROJECTS</a>
+      <a href="#repos">REPOS</a>
+      <a href="#feed">FEED</a>
+      <a href="#contact">CONTACT</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-status">
+          <span class="hero-status-dot"></span>
+          <span class="hero-status-text">SHIPPING // 2026.06</span>
+        </div>
+        <h1 class="hero-name display">NXR<br>SKYAA</h1>
+        <p class="hero-tagline">
+          <strong>Onchain Analyst.</strong> Onchain Builder.<br>
+          Agentic Coding. Based in Bali.<br>
+          Ship it, polish it, make it feel alive.
+        </p>
+      </div>
+      <div class="hero-right">
+        <div class="hero-location">BALI, ID</div>
+        <div class="hero-meta">
+          NXR // <span>EST. 2024</span><br>
+          GITHUB <span>31</span> REPOS<br>
+          X <span>1.4K</span> FOLLOWERS<br>
+          STACK <span>WEB3 × AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" data-target="31">0<span class="unit">REPOS</span></div>
+        <div class="stat-label">GitHub</div>
+        <div class="stat-bar" data-segments="31" data-max="40"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-target="26">0<span class="unit">STARS</span></div>
+        <div class="stat-label">Received</div>
+        <div class="stat-bar" data-segments="26" data-max="40"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-target="1400">0<span class="unit">FOLLOWERS</span></div>
+        <div class="stat-label">X / Twitter</div>
+        <div class="stat-bar" data-segments="14" data-max="20" data-accent="true"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-target="12">0<span class="unit">LIVE</span></div>
+        <div class="stat-label">Deployed Apps</div>
+        <div class="stat-bar" data-segments="12" data-max="20"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-target="7">0<span class="unit">YEARS</span></div>
+        <div class="stat-label">Building</div>
+        <div class="stat-bar" data-segments="7" data-max="10"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title"><span class="num">01</span>OPERATOR PROFILE</h2>
+      <span class="section-count">// WHO</span>
+    </div>
+
+    <div class="about-code">
+<span class="key">const</span> <span class="val">nxrskyaa</span> <span class="punct">=</span> <span class="punct">{</span><br>
+&nbsp;&nbsp;<span class="key">role</span><span class="punct">:</span> <span class="str">"Web3 + AI Agent Builder"</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">vibe</span><span class="punct">:</span> <span class="str">"clean UI, fast experiments, on-chain playgrounds"</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">currentlyCooking</span><span class="punct">:</span> <span class="punct">[</span><span class="str">"Tennis Rally Arc"</span><span class="punct">,</span> <span class="str">"Ritual Chain dApps"</span><span class="punct">,</span> <span class="str">"autonomous agents"</span><span class="punct">]</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">favoriteStack</span><span class="punct">:</span> <span class="punct">[</span><span class="str">"Next.js"</span><span class="punct">,</span> <span class="str">"TypeScript"</span><span class="punct">,</span> <span class="str">"Tailwind"</span><span class="punct">,</span> <span class="str">"wagmi"</span><span class="punct">,</span> <span class="str">"viem"</span><span class="punct">]</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">motto</span><span class="punct">:</span> <span class="str">"ship it, polish it, make it feel alive"</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">focus</span><span class="punct">:</span> <span class="str">"onchain AI inference, TEE precompiles, agentic dApps"</span><span class="punct">,</span><br>
+&nbsp;&nbsp;<span class="key">location</span><span class="punct">:</span> <span class="str">"Bali, Indonesia"</span><span class="punct">,</span><br>
+<span class="punct">}</span><span class="punct">;</span>
+    </div>
+
+    <div class="about-tags">
+      <span class="tag">web3</span>
+      <span class="tag">ritual chain</span>
+      <span class="tag">autonomous agents</span>
+      <span class="tag">next.js</span>
+      <span class="tag">wagmi</span>
+      <span class="tag">viem</span>
+      <span class="tag">ai x crypto</span>
+      <span class="tag">onchain inference</span>
+      <span class="tag">tailwind</span>
+      <span class="tag">framer motion</span>
+      <span class="tag">hardhat</span>
+      <span class="tag">solidity</span>
+      <span class="tag">arc testnet</span>
+      <span class="tag">tee precompiles</span>
+    </div>
+
+    <div style="margin-top:48px;">
+      <div class="label" style="margin-bottom:20px;">// GITHUB ACHIEVEMENTS</div>
+      <div class="achievements">
+        <div class="achievement">
+          <div class="achievement-icon star"></div>
+          <span class="achievement-name">Starstruck</span>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon shark"></div>
+          <span class="achievement-name">Pull Shark</span>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon pair"></div>
+          <span class="achievement-name">Pair Extraordinaire ×2</span>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon yolo"></div>
+          <span class="achievement-name">YOLO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PROJECTS -->
+<section class="section" id="projects">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title"><span class="num">02</span>FEATURED BUILDS</h2>
+      <span class="section-count">// SELECTED WORK</span>
+    </div>
+
+    <div class="projects-featured">
+      <!-- Tennis Rally Arc -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">Tennis Rally Arc</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Arcade tennis rally game on Arc Testnet — playable without wallet, score submit with injected wallet.</p>
+        <div class="project-stack">
+          <span>Next.js</span><span>Tailwind</span><span>wagmi</span><span>viem</span><span>Arc Testnet</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/nxrskyaa/tennis-rally-arc" target="_blank" class="project-link primary">SOURCE</a>
+        </div>
+      </div>
+
+      <!-- Ritual Agent Feeds -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">Ritual Agent Terminal</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Onchain message feed on Ritual Testnet — real-time agent communication terminal.</p>
+        <div class="project-stack">
+          <span>Next.js</span><span>TypeScript</span><span>Ritual Testnet</span>
+        </div>
+        <div class="project-links">
+          <a href="https://ritual-agent-feeds.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/ritual-agent-feeds" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+
+      <!-- CVGEN -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">CVGEN</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Web3 CV generator — create onchain-native resumes with verified identity.</p>
+        <div class="project-stack">
+          <span>Next.js</span><span>TypeScript</span><span>Tailwind</span>
+        </div>
+        <div class="project-links">
+          <a href="https://cvgen-five.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/CVGEN" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+
+      <!-- Rialo Temple Agent -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">Rialo Temple Agent</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Onchain agent integration for Rialo protocol — connecting smart contracts to offchain APIs.</p>
+        <div class="project-stack">
+          <span>Next.js</span><span>TypeScript</span><span>Rialo</span>
+        </div>
+        <div class="project-links">
+          <a href="https://rialo-temple-agent.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/RialoTempleAgent" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+
+      <!-- Arcynite Game -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">Arcynite</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Colorful Arc Testnet onboarding game — gamified chain education MVP.</p>
+        <div class="project-stack">
+          <span>TypeScript</span><span>Arc Testnet</span>
+        </div>
+        <div class="project-links">
+          <a href="https://arcynitegame.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/Arcynite-Game" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+
+      <!-- Arctective -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">Arctective</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Arc Testnet detective game — interactive onchain investigation experience.</p>
+        <div class="project-stack">
+          <span>TypeScript</span><span>Arc Testnet</span>
+        </div>
+        <div class="project-links">
+          <a href="https://arctective.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/Arctective" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+
+      <!-- CONSTUAL -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">CONSTUAL</h3>
+          <span class="project-stars mono">★ 7</span>
+        </div>
+        <p class="project-desc">Latest build — actively shipping. TypeScript project updated within hours.</p>
+        <div class="project-stack">
+          <span>TypeScript</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/nxrskyaa/CONSTUAL" target="_blank" class="project-link primary">CODE</a>
+        </div>
+      </div>
+
+      <!-- gritual -->
+      <div class="project-card reveal">
+        <div class="project-header">
+          <h3 class="project-name">gritual</h3>
+          <span class="project-stars mono">★ 0</span>
+        </div>
+        <p class="project-desc">Ritual Testnet explorer — visualization tool for onchain data.</p>
+        <div class="project-stack">
+          <span>TypeScript</span><span>Ritual Testnet</span>
+        </div>
+        <div class="project-links">
+          <a href="https://gritual-explorer.vercel.app" target="_blank" class="project-link primary">LIVE</a>
+          <a href="https://github.com/nxrskyaa/gritual" target="_blank" class="project-link">CODE</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALL REPOS -->
+<section class="section" id="repos">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title"><span class="num">03</span>ALL REPOSITORIES</h2>
+      <span class="section-count">// 31 TOTAL</span>
+    </div>
+
+    <div class="repo-list" id="repo-list">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- X FEED -->
+<section class="section" id="feed">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title"><span class="num">04</span>RECENT SIGNAL</h2>
+      <span class="section-count">// X / TWITTER</span>
+    </div>
+
+    <div class="feed-grid">
+      <div class="feed-card reveal">
+        <div class="feed-header">
+          <span class="feed-handle mono">@nxrskyaa</span>
+          <span class="feed-date">JUN 2026</span>
+        </div>
+        <div class="feed-body">
+          <strong>Rialo</strong> — most blockchains are good at moving tokens but struggle with real-world data. Rialo lets smart contracts connect to offchain APIs, identity systems, and triggers — turning tokenized RWAs into "living assets" that react to real events.
+        </div>
+        <div class="feed-footer">
+          <span class="feed-stat">↻ REPOST</span>
+          <span class="feed-stat">♡ LIKE</span>
+        </div>
+      </div>
+
+      <div class="feed-card reveal">
+        <div class="feed-header">
+          <span class="feed-handle mono">@nxrskyaa</span>
+          <span class="feed-date">JUN 2026</span>
+        </div>
+        <div class="feed-body">
+          <strong>Ritual Agent Skills</strong> — AI coding agents can now understand Ritual's primitives to autonomously build, test, and deploy onchain apps. No more manual everything. Autonomous onchain agents combining crypto ownership + AI intelligence via precompiles, TEEs, callbacks.
+        </div>
+        <div class="feed-footer">
+          <span class="feed-stat">↻ REPOST</span>
+          <span class="feed-stat">♡ LIKE</span>
+        </div>
+      </div>
+
+      <div class="feed-card reveal">
+        <div class="feed-header">
+          <span class="feed-handle mono">@nxrskyaa</span>
+          <span class="feed-date">JUN 2026</span>
+        </div>
+        <div class="feed-body">
+          <strong>Optimum</strong> uses Random Linear Network Coding for provably optimal data dissemination — speed + reliability even with packet loss. Flexnodes run permissionless on existing setups.
+        </div>
+        <div class="feed-footer">
+          <span class="feed-stat">↻ REPOST</span>
+          <span class="feed-stat">♡ LIKE</span>
+        </div>
+      </div>
+
+      <div class="feed-card reveal">
+        <div class="feed-header">
+          <span class="feed-handle mono">@nxrskyaa</span>
+          <span class="feed-date">ONGOING</span>
+        </div>
+        <div class="feed-body">
+          Building onchain AI agents that hold capital, access models, and act autonomously. Currently exploring Ritual's TEE-based precompiles for verifiable inference. <strong>Ship it, polish it, make it feel alive.</strong>
+        </div>
+        <div class="feed-footer">
+          <span class="feed-stat">↻ REPOST</span>
+          <span class="feed-stat">♡ LIKE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <h2 class="contact-title display">LET'S<br>BUILD.</h2>
+      <p class="contact-sub">Open to work & collaboration. DM on X.</p>
+      <div class="contact-links">
+        <a href="https://x.com/nxrskyaa" target="_blank" class="contact-link primary">X / TWITTER</a>
+        <a href="https://github.com/nxrskyaa" target="_blank" class="contact-link">GITHUB</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-text">NXR // ONCHAIN BUILDER // BALI</span>
+    <span class="footer-text">BUILT 2026 // NOTHING GLYPH STYLE</span>
+  </div>
+</footer>
+
+<script>
+  // BOOT SEQUENCE
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('boot').classList.add('done');
+    }, 1200);
+  });
+
+  // REPO DATA
+  const repos = [
+    {name:"CONSTUAL", desc:"", lang:"TypeScript", stars:7, fork:false, updated:"2H AGO", homepage:""},
+    {name:"ritual-chain-workshop", desc:"Building and deploying an on-chain AI bounty judge on Ritual", lang:"TypeScript", stars:19, fork:true, updated:"1D AGO", homepage:""},
+    {name:"RialoTempleAgent", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"2D AGO", homepage:"rialo-temple-agent.vercel.app"},
+    {name:"alodoc-consult", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"10D AGO", homepage:"alodoc-zeta.vercel.app"},
+    {name:"ritual-agent-feeds", desc:"Ritual Agent Terminal — onchain message feed on Ritual Testnet", lang:"TypeScript", stars:0, fork:false, updated:"JUN 14", homepage:"ritual-agent-feeds.vercel.app"},
+    {name:"Nxrskyaa-fable", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"JUN 13", homepage:"nxrskyaa-fable.vercel.app"},
+    {name:"NxrLabsFableTest", desc:"NXRSkyaa Labs — premium SaaS landing page", lang:"TypeScript", stars:0, fork:false, updated:"JUN 13", homepage:""},
+    {name:"NXRSkyaa-Labs", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"JUN 12", homepage:""},
+    {name:"heaggy", desc:"", lang:"—", stars:0, fork:false, updated:"JUN 04", homepage:""},
+    {name:"Arcsight", desc:"", lang:"—", stars:0, fork:false, updated:"JUN 01", homepage:""},
+    {name:"Arcynite-Game", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 24", homepage:"arcynitegame.vercel.app"},
+    {name:"Arctective", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 23", homepage:"arctective.vercel.app"},
+    {name:"rialoball", desc:"gabut game", lang:"HTML", stars:0, fork:false, updated:"MAY 22", homepage:""},
+    {name:"DashboardNXR", desc:"", lang:"—", stars:0, fork:false, updated:"MAY 19", homepage:""},
+    {name:"arcynite", desc:"Arcynite colorful Arc Testnet onboarding game MVP", lang:"TypeScript", stars:0, fork:false, updated:"MAY 18", homepage:""},
+    {name:"nxrskyaa", desc:"Profile README", lang:"—", stars:0, fork:false, updated:"MAY 18", homepage:""},
+    {name:"siggy-scroll", desc:"Gamified Ritual Testnet Onboarding with Galaxy Magical Theme", lang:"—", stars:0, fork:false, updated:"MAY 17", homepage:""},
+    {name:"tennis-rally-arc", desc:"Cute arcade tennis game on Arc Testnet with on-chain profiles", lang:"TypeScript", stars:0, fork:false, updated:"MAY 16", homepage:""},
+    {name:"rialotemple", desc:"alpha build", lang:"TypeScript", stars:0, fork:false, updated:"MAY 15", homepage:""},
+    {name:"CVGEN", desc:"WEB3 CV GENERATOR BY NXRSKYAA", lang:"TypeScript", stars:0, fork:false, updated:"MAY 12", homepage:"cvgen-five.vercel.app"},
+    {name:"alternite-rialo", desc:"early phase building", lang:"TypeScript", stars:0, fork:false, updated:"MAY 12", homepage:""},
+    {name:"agenticonchainritual", desc:"Replic Version", lang:"TypeScript", stars:0, fork:false, updated:"MAY 11", homepage:""},
+    {name:"ritualarenafeeds", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 09", homepage:""},
+    {name:"ritualagenticfeeds", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 09", homepage:""},
+    {name:"agentfeeds", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 09", homepage:""},
+    {name:"ritualagentic", desc:"", lang:"TypeScript", stars:0, fork:false, updated:"MAY 09", homepage:""},
+    {name:"gritual", desc:"ritual testnet explore visualization", lang:"TypeScript", stars:0, fork:false, updated:"MAY 08", homepage:"gritual-explorer.vercel.app"},
+    {name:"NXRScreener", desc:"Crypto smart money screener", lang:"TypeScript", stars:0, fork:false, updated:"MAY 08", homepage:""},
+    {name:"nxrpulse", desc:"Simple build to help crypto space better", lang:"HTML", stars:0, fork:false, updated:"MAY 07", homepage:""},
+    {name:"ritualtennisonchain", desc:"Ritual Tennis Onchain by NXR", lang:"TypeScript", stars:0, fork:false, updated:"MAY 07", homepage:"tennisnxr.vercel.app"},
+    {name:"ritualtestnetdapps", desc:"Ritual Testnet Community DApps Explorer", lang:"TypeScript", stars:0, fork:false, updated:"MAY 06", homepage:""},
+  ];
+
+  // RENDER REPOS
+  const repoList = document.getElementById('repo-list');
+  repos.forEach((r, i) => {
+    const row = document.createElement('a');
+    row.className = 'repo-row';
+    row.href = `https://github.com/nxrskyaa/${r.name}`;
+    row.target = '_blank';
+    row.style.textDecoration = 'none';
+    row.innerHTML = `
+      <span class="repo-index">${String(i+1).padStart(2,'0')}</span>
+      <span class="repo-name">${r.name}${r.fork ? '<span class="fork-tag">FORK</span>' : ''}</span>
+      <span class="repo-desc">${r.desc || '—'}</span>
+      <span class="repo-lang">${r.lang}</span>
+      <span class="repo-updated">${r.updated}</span>
+    `;
+    repoList.appendChild(row);
+  });
+
+  // STAT BARS
+  document.querySelectorAll('.stat-bar').forEach(bar => {
+    const segs = parseInt(bar.dataset.segments);
+    const max = parseInt(bar.dataset.max);
+    const isAccent = bar.dataset.accent === 'true';
+    const total = Math.min(segs, max);
+    for (let i = 0; i < total; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'stat-bar-seg filled' + (isAccent && i === total - 1 ? ' accent' : '');
+      bar.appendChild(seg);
+    }
+    // Fill remaining with empty segments up to max
+    for (let i = total; i < max; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'stat-bar-seg';
+      bar.appendChild(seg);
+    }
+  });
+
+  // COUNTER ANIMATION
+  const counters = document.querySelectorAll('.stat-value');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        const unit = el.querySelector('.unit')?.outerHTML || '';
+        let current = 0;
+        const step = Math.max(1, Math.ceil(target / 40));
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          el.innerHTML = current + unit;
+        }, 30);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterObserver.observe(c));
+
+  // SCROLL REVEAL
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // NAV ACTIVE STATE
+  const sections = document.querySelectorAll('section[id], div[id="contact"]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+</script>
+
+</body>
+</html>
